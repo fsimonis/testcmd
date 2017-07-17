@@ -1,0 +1,41 @@
+#!/bin/env python
+
+import argparse
+import sys
+import subprocess
+
+
+def testcmd(input, output, cmdargs, verbose=False):
+    ret = subprocess.run(cmdargs, input=input, stdout=subprocess.PIPE)
+    if ret.stdout == output:
+        return True
+    else:
+        if verbose:
+            print("Outputs do not match!")
+            print("Received: {}".format(ret.stdout))
+            print("Expected: {}".format(output))
+        return False
+
+
+def main():
+    args = parse_args()
+    input = open(args.infile, "rb").read()
+    output = open(args.outfile, "rb").read()
+    return testcmd(input, output, args.command, args.verbose)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--verbose", "-v", help="Show output on mismatch", action="store_true")
+    parser.add_argument(
+        "infile", help="File containing input to pipe into command")
+    parser.add_argument(
+        "outfile", help="File containing output to check against")
+    parser.add_argument(
+        "command", help="The command", nargs=argparse.REMAINDER)
+    return parser.parse_args(sys.argv[1:])
+
+
+if __name__ == "__main__":
+    sys.exit(0 if main() else 1)
